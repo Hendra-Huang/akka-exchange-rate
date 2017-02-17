@@ -3,3 +3,5 @@
 # ~~~~
 
 GET      /                          controllers.RateController.get
+GET      /realtime                  controllers.RateController.realtime
+GET      /rate-ws                   controllers.RateController.rateSocket

@@ -63,12 +63,29 @@ class RateActor @Inject() (
       }
 
       sender() ! futureAggregateRate
+
+    case Watch =>
+      implicit val timeout: Timeout = 2 seconds
+      val out = sender
+
+      (currencyLayerApi ? FetchLatest).mapTo[Future[RateUpdate]]
+        .flatMap { futureRate =>
+          futureRate map { rate =>
+            out ! rate
+          }
+        }
+      (fixerIoApi ? FetchLatest).mapTo[Future[RateUpdate]]
+        .flatMap { futureRate =>
+          futureRate map { rate =>
+            out ! rate
+          }
+        }
+
   }
 }
 
 object RateActor {
   case object FetchLatest
-  case class RateUpdate(provider: String, rates: Rate)
+  case class RateUpdate(provider: String, rate: Rate)
   case object Watch
-  case class WatchUpdate(provider: String, rates: List[Number])
 }
